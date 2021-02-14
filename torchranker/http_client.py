@@ -1,10 +1,38 @@
-from socket import timeout
-from typing import Tuple
-import requests
+import asyncio
 import logging
-import time
+from typing import Tuple
+
+import aiohttp
 
 _logger = logging.getLogger(__name__)
+
+
+# def send_num_gpus(url: str, num_gpus: int) -> Tuple[str, int]:
+#     async def _send():
+#         success = False
+#         while not success:
+#             try:
+#                 pass
+
+async def send_num_gpus(url: str, num_gpus: int):
+    async with aiohttp.ClientSession() as session:
+        # success = False
+        while True:
+            try:
+                async with session.get(url, params=dict(num_gpus=num_gpus)) as resp:
+                    data = await resp.json()
+                    return data
+            except:
+                _logger.debug('wait for 5 seconds')
+                await asyncio.sleep(5)
+
+
+async def send_shutdown(url: str):
+    async with aiohttp.ClientSession() as session:
+        try:
+            await session.get(url)
+        except:
+            _logger.warning('send shutdown')
 
 
 def get_dist_info(
@@ -15,23 +43,15 @@ def get_dist_info(
 ) -> Tuple[str, int]:
     url = f'http://{host}:{http_port}'
 
-    success = False
-    while not success:
-        try:
-            resp = requests.get(url, params=dict(num_gpus=num_gpus))
-            success = True
-        except:
-            time.sleep(5)
+    
+    loop = asyncio.get_event_loop()
+    data = loop.run_until_complete(send_num_gpus(url, num_gpus))
 
-    data = resp.json()
     dist_url = data['dist_url']
     rank_start = data['rank_start']
 
     if rank_start + num_gpus >= world_size:
-        try:
-            resp = requests.get(url + '/shutdown')
-        except:
-            _logger.warning('shutdown server with stats: %s', resp.status_code)
+        loop.run_until_complete(send_shutdown(url + '/shutdown'))
 
     return dist_url, rank_start
 

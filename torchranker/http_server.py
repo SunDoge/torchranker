@@ -4,6 +4,9 @@ from aiohttp import web
 from . import utils
 from contextvars import ContextVar
 from asyncio import CancelledError
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 async def dist_handler(request: web.Request):
@@ -28,6 +31,7 @@ async def dist_handler(request: web.Request):
 
 
 async def shutdown_handler(request: web.Request):
+    _logger.info('shutdown server')
     raise KeyboardInterrupt()
 
 

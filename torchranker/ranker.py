@@ -26,7 +26,14 @@ def get_dist_info(
         dist_port = utils.find_free_port()
         _logger.debug('find free dist_port: %s', dist_port)
 
-    if utils.host_is_local(host):
+    if num_gpus >= world_size:
+        _logger.info('running dist on same node, skip server')
+        return utils.get_dist_url(host, dist_port), 0
+
+    if utils.host_is_local(host) and utils.is_free_port(http_port):
+        """
+        同一个node，先bind http_port的为rank0
+        """
         _logger.debug('this is node0, start http server')
         return http_server.start_web_server(
             host=host,
@@ -35,7 +42,7 @@ def get_dist_info(
             rank_start=num_gpus
         )
     else:
-        _logger.debug('this is not node0, try to get dist info')
+        _logger.debug('this is not rank0, try to get dist info')
         return http_client.get_dist_info(
             host=host,
             http_port=http_port,
