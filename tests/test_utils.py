@@ -14,3 +14,8 @@ def test_is_loopback():
 def test_find_free_port():
     free_port = utils.find_free_port()
     assert utils.is_free_port(free_port), free_port
+
+
+def test_is_localhost():
+    assert utils.host_is_local('127.0.0.1')
+    assert not utils.host_is_local('baidu.com')
