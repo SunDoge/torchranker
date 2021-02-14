@@ -20,7 +20,7 @@ def main():
 
     parser = get_parser()
     args = parser.parse_args()
-    num_gpus = torch.cuda.device_count()
+    nprocs = torch.cuda.device_count()
     host = args.host
     dist_port = args.dist_port
     http_port = args.http_port
@@ -30,7 +30,7 @@ def main():
         host=host,
         http_port=http_port,
         dist_port=dist_port,
-        num_gpus=num_gpus,
+        nprocs=nprocs,
         world_size=world_size,
     )
 

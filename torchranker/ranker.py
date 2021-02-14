@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 def get_dist_info(
     host: str,
     http_port: int,
-    num_gpus: int,
+    nprocs: int,
     world_size: int,
     dist_port: Optional[int] = None,
 ) -> Tuple[str, int]:
@@ -26,7 +26,7 @@ def get_dist_info(
         dist_port = utils.find_free_port()
         _logger.debug('find free dist_port: %s', dist_port)
 
-    if num_gpus >= world_size:
+    if nprocs >= world_size:
         _logger.info('running dist on same node, skip server')
         return utils.get_dist_url(host, dist_port), 0
 
@@ -39,13 +39,13 @@ def get_dist_info(
             host=host,
             dist_port=dist_port,
             http_port=http_port,
-            rank_start=num_gpus
+            rank_start=nprocs
         )
     else:
         _logger.debug('this is not rank0, try to get dist info')
         return http_client.get_dist_info(
             host=host,
             http_port=http_port,
-            num_gpus=num_gpus,
+            nprocs=nprocs,
             world_size=world_size
         )

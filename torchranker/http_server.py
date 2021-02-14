@@ -10,14 +10,14 @@ _logger = logging.getLogger(__name__)
 
 
 async def dist_handler(request: web.Request):
-    num_gpus = int(request.query['num_gpus'])
-    # num_gpus = int(request.match_info['num_gpus'])
+    nprocs = int(request.query['nprocs'])
+    # nprocs = int(request.match_info['nprocs'])
     rank_start = request.app['rank_start']
     data = {
         'dist_url': request.app['dist_url'],
         'rank_start': rank_start,
     }
-    new_rank_start = rank_start + num_gpus
+    new_rank_start = rank_start + nprocs
     request.app['rank_start'] = new_rank_start
     return web.json_response(data)
 

@@ -7,19 +7,19 @@ import aiohttp
 _logger = logging.getLogger(__name__)
 
 
-# def send_num_gpus(url: str, num_gpus: int) -> Tuple[str, int]:
+# def send_nprocs(url: str, nprocs: int) -> Tuple[str, int]:
 #     async def _send():
 #         success = False
 #         while not success:
 #             try:
 #                 pass
 
-async def send_num_gpus(url: str, num_gpus: int):
+async def send_nprocs(url: str, nprocs: int):
     async with aiohttp.ClientSession() as session:
         # success = False
         while True:
             try:
-                async with session.get(url, params=dict(num_gpus=num_gpus)) as resp:
+                async with session.get(url, params=dict(nprocs=nprocs)) as resp:
                     data = await resp.json()
                     return data
             except:
@@ -38,19 +38,19 @@ async def send_shutdown(url: str):
 def get_dist_info(
     host: str,
     http_port: int,
-    num_gpus: int,
+    nprocs: int,
     world_size: int,
 ) -> Tuple[str, int]:
     url = f'http://{host}:{http_port}'
 
     
     loop = asyncio.get_event_loop()
-    data = loop.run_until_complete(send_num_gpus(url, num_gpus))
+    data = loop.run_until_complete(send_nprocs(url, nprocs))
 
     dist_url = data['dist_url']
     rank_start = data['rank_start']
 
-    if rank_start + num_gpus >= world_size:
+    if rank_start + nprocs >= world_size:
         loop.run_until_complete(send_shutdown(url + '/shutdown'))
 
     return dist_url, rank_start
