@@ -51,7 +51,7 @@ def start_web_server(
     except KeyboardInterrupt:
         pass
 
-    return dist_url, rank_start
+    return dist_url, 0
 
 
 if __name__ == '__main__':

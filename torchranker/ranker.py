@@ -26,7 +26,7 @@ def get_dist_info(
         dist_port = utils.find_free_port()
         _logger.debug('find free dist_port: %s', dist_port)
 
-    if utils.is_loopback(host):
+    if utils.host_is_local(host):
         _logger.debug('this is node0, start http server')
         return http_server.start_web_server(
             host=host,
